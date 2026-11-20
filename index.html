@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1f3035">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="节奏训练室">
+  <meta name="description" content="离线节拍保持、节奏视读与时间偏差反馈">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <title>节奏训练室 · Rhythm Lab</title>
+  <style>
+    :root { color-scheme: light; --ink:#203337; --muted:#617477; --cream:#f8f5ee; --paper:#fffefa; --line:#d9dfda; --accent:#a26937; --accent2:#276459; --bad:#a34d40; --soft:#eaf2ee; --shadow:0 12px 34px rgba(28,46,45,.08); }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","PingFang SC","Microsoft YaHei",sans-serif; color:var(--ink); background:linear-gradient(155deg,#ecf1ec 0,#f9f6ef 45%,#eef2ec 100%) fixed; line-height:1.5; }
+    button, input, select { font: inherit; }
+    button { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    button:focus-visible, input:focus-visible, select:focus-visible, .tap-pad:focus-visible { outline:3px solid #bf9b58; outline-offset:3px; }
+    .wrap { width:min(980px,calc(100% - 32px)); margin:0 auto; padding:28px 0 48px; }
+    header { background:#20363a; color:#fffaf1; border-radius:22px; padding:25px 30px 26px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+    header:before { content:""; position:absolute; right:-70px; top:-90px; border:1px solid #ffffff27; width:290px; height:290px; border-radius:50%; box-shadow:0 0 0 47px #ffffff09,0 0 0 95px #ffffff08; pointer-events:none; }
+    .eyebrow { font-family:Georgia,serif; font-size:.7rem; letter-spacing:.3em; color:#d5bd94; }
+    h1 { font-size:clamp(1.65rem,4vw,2.35rem); letter-spacing:.06em; margin:8px 0 3px; font-weight:650; }
+    .subtitle { color:#c6d4d1; font-size:.92rem; margin:0; }
+    .top-stats { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+    .pill { border:1px solid #ffffff38; padding:5px 10px; border-radius:100px; color:#e5f1e8; font-size:.78rem; }
+    main { display:grid; gap:16px; margin-top:18px; }
+    .card { background:var(--paper); border:1px solid #e2e5df; border-radius:20px; padding:22px 24px; box-shadow:var(--shadow); }
+    .tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; padding:5px; border-radius:15px; background:#eef2ed; }
+    .tab { border:none; border-radius:11px; background:transparent; padding:12px 8px; font-weight:650; color:#526a69; font-size:.97rem; }
+    .tab[aria-selected="true"] { background:var(--paper); color:#255b51; box-shadow:0 2px 8px #182b251b; }
+    .mode-intro { margin:14px 3px 3px; color:var(--muted); font-size:.9rem; min-height:45px; }
+    .section-title { margin:0 0 14px; font-size:1.05rem; }
+    .settings { display:flex; align-items:end; flex-wrap:wrap; gap:16px 24px; }
+    .control-group { min-width:140px; }
+    label.small-label { display:block; font-size:.75rem; color:var(--muted); font-weight:600; margin-bottom:8px; }
+    .stepper { display:flex; align-items:center; gap:7px; }
+    .stepper button { width:37px; height:38px; border:1px solid var(--line); border-radius:10px; background:white; color:var(--ink); font-size:1.25rem; }
+    .tempo-value { min-width:55px; text-align:center; font-size:1.25rem; font-variant-numeric:tabular-nums; font-weight:750; }
+    .tempo-unit { font-size:.7rem; color:var(--muted); }
+    select { border:1px solid var(--line); background:#fff; border-radius:10px; padding:9px 12px; min-height:40px; color:var(--ink); }
+    .setting-grow { flex:1 1 150px; }
+    .setting-grow input { width:100%; accent-color:#276459; }
+    .hint { color:var(--muted); font-size:.79rem; margin-top:13px; }
+    .setup-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:17px; }
+    .btn { border:1px solid var(--line); background:white; color:var(--ink); border-radius:11px; padding:10px 15px; min-height:43px; font-weight:640; }
+    .btn.primary { background:#276459; border-color:#276459; color:white; }
+    .btn.subtle { background:#edf3ef; border-color:#d7e7dc; color:#24584e; }
+    .btn.danger { background:#f7ece9; color:#8e483f; border-color:#edd5d1; }
+    .btn.secondary { font-weight:550; }
+    .btn:active:not(:disabled) { transform:translateY(1px); }
+    .practice-header { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+    .status { color:#4d6966; font-size:.92rem; min-height:28px; font-weight:600; }
+    .tag { font-size:.75rem; letter-spacing:.035em; background:#e6f0eb; color:#286056; border-radius:100px; padding:5px 10px; }
+    .staff-area { display:grid; gap:10px; margin:4px 0 16px; }
+    .measure { border:1px solid #e3e6df; background:#fffefc; border-radius:11px; padding:3px 9px 6px; }
+    .measure-head { font-size:.75rem; color:#63706f; margin:3px 4px -2px; display:flex; justify-content:space-between; }
+    .measure svg { width:100%; display:block; height:auto; }
+    svg .staff-line { stroke:#4c5955; stroke-width:1.2; }
+    svg .notemark { fill:#203337; stroke:#203337; }
+    svg .notehit { fill:#2e7764; stroke:#2e7764; }
+    svg .notemiss { fill:#b66b4a; stroke:#b66b4a; }
+    svg .notation-label { fill:#647670; stroke:none; font-size:13px; font-family:system-ui,sans-serif; }
+    .practice-board { border:1px solid #d6e0d9; padding:16px; border-radius:15px; background:linear-gradient(165deg,#f8fbf8,#f1f6f1); }
+    .session-top { display:flex; align-items:center; gap:12px; justify-content:space-between; margin-bottom:12px; min-height:26px; }
+    .phase { font-size:.9rem; color:#5b706b; font-weight:620; }
+    .elapsed { color:#71827a; font-size:.79rem; font-variant-numeric:tabular-nums; }
+    .tap-pad { display:flex; align-items:center; justify-content:center; flex-direction:column; border:2px solid #b7d2c4; color:#225448; border-radius:17px; width:100%; min-height:188px; background:#e5f1e9; transition:background .09s,transform .09s; user-select:none; -webkit-user-select:none; touch-action:none; }
+    .tap-pad.live { background:#d8eae0; border-color:#77ab96; }
+    .tap-pad.pressed { background:#9fc8b2; transform:scale(.996); }
+    .tap-pad .tap-big { font-size:clamp(1.3rem,4vw,1.75rem); font-weight:760; letter-spacing:.06em; }
+    .tap-pad .tap-small { font-size:.83rem; margin-top:6px; color:#507a6a; }
+    .results { display:none; }
+    .results.visible { display:block; }
+    .results-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; margin-top:12px; }
+    .metric { border:1px solid #e1e8df; background:#f8faf6; border-radius:12px; padding:13px; }
+    .metric .number { font-size:1.4rem; font-weight:780; font-variant-numeric:tabular-nums; }
+    .metric .caption { color:#687a72; font-size:.76rem; margin-top:2px; }
+    .feedback { margin:12px 0 0; color:#445d55; font-size:.9rem; }
+    .errors { margin-top:15px; display:flex; gap:6px; overflow-x:auto; padding:2px 0 8px; }
+    .error-cell { border:1px solid #dae4dc; border-radius:9px; min-width:52px; text-align:center; padding:7px 4px; background:#fbfcf8; font-variant-numeric:tabular-nums; }
+    .error-cell .index { display:block; font-size:.7rem; color:#768880; }
+    .error-cell .val { font-size:.81rem; font-weight:650; }
+    .error-cell.missing { background:#f7ece7; border-color:#f1d8ce; color:#995b46; }
+    .calib-note { font-size:.85rem; color:#536a62; border-left:3px solid #bf986d; padding-left:11px; margin-top:13px; }
+    .history-head { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .history-head .section-title { margin:0; }
+    .history-actions { display:flex; gap:7px; }
+    .history-table { margin-top:14px; width:100%; border-collapse:collapse; font-size:.83rem; }
+    .history-table th { font-weight:650; color:#667973; text-align:left; border-bottom:1px solid var(--line); padding:9px 6px; }
+    .history-table td { border-bottom:1px solid #ebeee9; padding:10px 6px; font-variant-numeric:tabular-nums; }
+    .empty { color:#718179; font-size:.88rem; padding:22px 0 7px; }
+    .footer { color:#778580; font-size:.77rem; margin:17px auto 0; text-align:center; }
+    .hidden { display:none!important; }
+    @media (max-width:600px) {
+      .wrap { width:calc(100% - 20px); padding-top:10px; }
+      header { border-radius:17px; padding:21px 19px; }
+      .card { border-radius:16px; padding:16px 13px; }
+      .tabs { gap:3px; }
+      .tab { padding:11px 3px; font-size:.88rem; }
+      .settings { gap:13px; }
+      .control-group { min-width:100px; }
+      .setting-grow { flex-basis:100%; }
+      .setup-actions { gap:7px; }
+      .setup-actions .btn { flex:1 1 auto; padding-left:11px; padding-right:11px; }
+      .practice-board { padding:10px; }
+      .tap-pad { min-height:175px; }
+      .results-grid { gap:6px; }
+      .metric { padding:10px 7px; }
+      .metric .number { font-size:1.14rem; }
+      .metric .caption { font-size:.69rem; }
+      .history-table { font-size:.73rem; }
+      .history-table td,.history-table th { padding:8px 3px; }
+      .hide-small { display:none; }
+    }
+    @media (prefers-reduced-motion: reduce) { *,*:before,*:after { transition:none!important; } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">RHYTHM LAB · V1.0</div>
+    <h1>节奏训练室</h1>
+    <p class="subtitle">从听见拍子，到拥有自己的时间感。</p>
+    <div class="top-stats"><span class="pill" id="statSessions">已完成 0 次</span><span class="pill" id="statRecent">最近命中率 —</span><span class="pill" id="statCal">校准偏移 未设置</span></div>
+  </header>
+  <main>
+    <section class="card" aria-label="训练模式">
+      <div class="tabs" role="tablist" aria-label="训练模式">
+        <button type="button" class="tab" role="tab" data-mode="pulse" aria-selected="true">① 跟随节拍</button>
+        <button type="button" class="tab" role="tab" data-mode="silent" aria-selected="false">② 静音保持</button>
+        <button type="button" class="tab" role="tab" data-mode="reading" aria-selected="false">③ 节奏视读</button>
+      </div>
+      <p class="mode-intro" id="modeIntro">先听一小节预备拍；随后连续四小节跟着节拍点击。结束后查看命中率和时间误差。</p>
+    </section>
+    <section class="card" aria-label="训练设置">
+      <h2 class="section-title">训练设置</h2>
+      <div class="settings">
+        <div class="control-group">
+          <label class="small-label" for="tempoValue">速度 BPM</label>
+          <div class="stepper"><button type="button" id="minusTempo" aria-label="降低每分钟拍数">−</button><div><div class="tempo-value" id="tempoValue">80</div><div class="tempo-unit">每分钟拍数</div></div><button type="button" id="plusTempo" aria-label="提高每分钟拍数">+</button></div>
+        </div>
+        <div class="control-group">
+          <label class="small-label" for="meter">拍号</label>
+          <select id="meter" aria-label="选择拍号"><option value="4">4/4</option><option value="3">3/4</option></select>
+        </div>
+        <div class="control-group" id="difficultyGroup">
+          <label class="small-label" for="difficulty">节奏难度</label>
+          <select id="difficulty"><option value="1">基础 · 四分/八分/二分</option><option value="2">进阶 · 附点/切分</option></select>
+        </div>
+        <div class="setting-grow">
+          <label class="small-label" for="tempoSlider">细调速度</label>
+          <input type="range" id="tempoSlider" min="40" max="160" step="1" value="80" aria-label="速度滑块">
+        </div>
+      </div>
+      <div class="hint" id="settingsHint">声音仅用于预备与节拍引导；建议先用 60–80 BPM。</div>
+      <div class="setup-actions">
+        <button type="button" class="btn primary" id="startBtn">▶ 开始训练</button>
+        <button type="button" class="btn danger hidden" id="stopBtn">■ 停止</button>
+        <button type="button" class="btn subtle" id="regenerateBtn">↻ 换一组节奏</button>
+        <button type="button" class="btn secondary" id="calibrateBtn">校准点击偏移</button>
+        <button type="button" class="btn secondary" id="testAudioBtn">试听节拍</button>
+      </div>
+    </section>
+    <section class="card" aria-label="训练区">
+      <div class="practice-header">
+        <div><h2 class="section-title" style="margin:0 0 5px">训练区</h2><div class="status" id="statusText" role="status" aria-live="polite">准备就绪 · 点击“开始训练”</div></div>
+        <span class="tag" id="phaseTag">等待开始</span>
+      </div>
+      <div class="staff-area hidden" id="staffArea" aria-label="节奏谱"></div>
+      <div class="practice-board">
+        <div class="session-top"><span class="phase" id="phaseText">音频会在开始后播放</span><span class="elapsed" id="tapCount">空格键 / 触屏</span></div>
+        <button type="button" id="tapPad" class="tap-pad" aria-label="节奏点击板：触摸屏幕或按空格键">
+          <span class="tap-big" id="padBig">点击这里打拍子</span>
+          <span class="tap-small" id="padSmall">手机触摸 · 电脑按空格键</span>
+        </button>
+      </div>
+      <p class="hint" id="modeHint">训练期间不要切换到其他应用；iPhone 请保持屏幕点亮。</p>
+    </section>
+    <section class="card results" id="resultCard" aria-label="训练结果">
+      <h2 class="section-title" id="resultTitle">本次结果</h2>
+      <div class="results-grid" id="resultMetrics"></div>
+      <p class="feedback" id="resultFeedback"></p>
+      <div id="errorSummary"></div>
+    </section>
+    <section class="card" aria-label="练习记录">
+      <div class="history-head"><h2 class="section-title">练习记录</h2><div class="history-actions"><button class="btn secondary" type="button" id="exportBtn">导出 CSV</button><button class="btn secondary" type="button" id="clearBtn">清除记录</button></div></div>
+      <div id="historyContent"></div>
+      <p class="hint">记录只保存在当前浏览器，不会上传。Safari 无痕浏览或清除网站数据后可能丢失；需要长期保存请定期导出 CSV。</p>
+    </section>
+  </main>
+  <p class="footer">Rhythm Lab v1.0 · 离线可用 · 仅供日常节奏练习，不代替专业演奏时值测量</p>
+</div>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const KEY = 'rhythm_lab_v1';
+  const INTRO = {
+    pulse:'先听一小节预备拍；随后连续四小节跟着节拍点击。结束后查看命中率和时间误差。',
+    silent:'先听一小节预备拍，再跟随两小节；随后两小节完全静音，继续点击，最后一小节恢复声音。只评分静音段。',
+    reading:'先观察两小节节奏谱，听完一小节预备拍后，根据谱面自行点击。正式练习时没有节拍声或移动提示。'
+  };
+  const MODE_NAME = { pulse:'跟随节拍',silent:'静音保持',reading:'节奏视读',calibration:'点击校准' };
+  const NOTE = {
+    q:{dur:1,kind:'note',short:'1'},h:{dur:2,kind:'half',short:'2'},e:{dur:.5,kind:'eighth',short:'½'},
+    dq:{dur:1.5,kind:'dotted',short:'1½'},rQ:{dur:1,kind:'restQ',short:'休1'},rE:{dur:.5,kind:'restE',short:'休½'}
+  };
+  const TEMPLATES = {
+    4:{
+      1:[['q','q','q','q'],['h','q','q'],['q','h','q'],['q','rQ','q','q'],['e','e','q','q','q'],['q','e','e','q','q'],['q','q','e','e','q'],['h','h'],['rQ','q','q','q'],['e','e','e','e','q','q'],['q','e','e','h'],['q','q','rQ','q']],
+      2:[['dq','e','q','q'],['q','dq','e','q'],['e','q','e','q','q'],['q','e','q','e','q'],['e','rE','e','e','q','q'],['q','rE','e','q','q'],['e','e','dq','e','q'],['rE','e','q','e','e','q'],['dq','e','dq','e'],['rQ','e','e','dq','e']]
+    },
+    3:{
+      1:[['q','q','q'],['h','q'],['q','h'],['e','e','q','q'],['q','e','e','q'],['rQ','q','q'],['q','rQ','q'],['e','e','e','e','q']],
+      2:[['dq','e','q'],['q','dq','e'],['e','q','e','q'],['q','rE','e','q'],['rE','e','q','q'],['e','e','dq','e'],['e','rE','e','e','q'],['dq','e','e','e']]
+    }
+  };
+
+  const defaultStore = { tempo:80,meter:4,difficulty:1,mode:'pulse',calibrationMs:null,history:[] };
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch { saved = {}; }
+  const store = { ...defaultStore,...saved };
+  store.history = Array.isArray(store.history) ? store.history.slice(0,200) : [];
+  store.tempo = Math.max(40,Math.min(160,Number(store.tempo)||80));
+  store.meter = [3,4].includes(Number(store.meter)) ? Number(store.meter) : 4;
+  store.difficulty = [1,2].includes(Number(store.difficulty)) ? Number(store.difficulty) : 1;
+  store.mode = INTRO[store.mode] ? store.mode : 'pulse';
+  store.calibrationMs = Number.isFinite(store.calibrationMs) ? store.calibrationMs : null;
+  let audio = null, session = null, measures = [], lastPatternKey = '';
+  const settingsControls = [...document.querySelectorAll('.tab'), $('minusTempo'),$('plusTempo'),$('tempoSlider'),$('meter'),$('difficulty'),$('startBtn'),$('regenerateBtn'),$('calibrateBtn'),$('testAudioBtn')];
+  const duration = type => NOTE[type].dur;
+  const fmt = n => Number(n).toFixed(0);
+  const sign = n => n > 0 ? `+${fmt(n)}` : fmt(n);
+  const median = vals => { if (!vals.length) return null; const x = [...vals].sort((a,b)=>a-b); const i=Math.floor(x.length/2); return x.length%2?x[i]:(x[i-1]+x[i])/2; };
+  const round1 = n => Math.round(n*10)/10;
+  function persist() { try { localStorage.setItem(KEY,JSON.stringify(store)); } catch {} }
+  function setText(id,text) { $(id).textContent = text; }
+  function setRunning(running) {
+    settingsControls.forEach(el=>el.disabled=running);
+    $('startBtn').classList.toggle('hidden',running);
+    $('stopBtn').classList.toggle('hidden',!running);
+    $('tapPad').classList.toggle('live',running);
+    $('tapPad').setAttribute('aria-disabled',String(!running));
+  }
+  function updateSettings() {
+    setText('tempoValue',store.tempo); $('tempoSlider').value=store.tempo;
+    $('meter').value=String(store.meter); $('difficulty').value=String(store.difficulty);
+    document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.mode===store.mode)));
+    setText('modeIntro',INTRO[store.mode]);
+    $('difficultyGroup').classList.toggle('hidden',store.mode!=='reading');
+    $('regenerateBtn').classList.toggle('hidden',store.mode!=='reading');
+    $('staffArea').classList.toggle('hidden',store.mode!=='reading');
+    setText('modeHint',store.mode==='silent' ? '静音段不显示节拍位置或倒计时，防止视觉提示代替内部节拍。' : store.mode==='reading' ? '音符均记在五线谱中间的 B 线上，只考节奏。休止符期间不要点击。' : '训练期间不要切换到其他应用；iPhone 请保持屏幕点亮。');
+    setText('settingsHint',store.mode==='reading'?'基础：四分、八分、二分音符及四分休止；进阶：附点、八分休止与切分。':'声音仅用于预备与引导；建议先用 60–80 BPM。');
+    updateStats();
+    if (store.mode==='reading') renderStaff();
+  }
+  function updateStats() {
+    const recent = store.history.find(h=>h.mode!=='calibration');
+    setText('statSessions',`已完成 ${store.history.filter(h=>h.mode!=='calibration').length} 次`);
+    setText('statRecent',`最近命中率 ${recent ? recent.hitRate+'%' : '—'}`);
+    setText('statCal',`校准偏移 ${store.calibrationMs===null?'未设置':sign(store.calibrationMs)+' ms'}`);
+  }
+  function setMode(mode) { if(session||!INTRO[mode]) return; store.mode=mode; persist(); updateSettings(); setText('statusText','准备就绪 · 点击“开始训练”'); setText('phaseTag','等待开始'); setText('phaseText','音频会在开始后播放'); }
+  function makeMeasures() {
+    const pool=TEMPLATES[store.meter][store.difficulty];
+    let a,b,key;
+    for(let i=0;i<15;i++) { a=Math.floor(Math.random()*pool.length); b=Math.floor(Math.random()*pool.length); if(a===b) continue; key=a+'-'+b+'-'+store.meter+'-'+store.difficulty; if(key!==lastPatternKey) break; }
+    if(a===b) b=(a+1)%pool.length;
+    measures=[pool[a].slice(),pool[b].slice()];
+    for(const m of measures) { const sum=m.reduce((s,t)=>s+duration(t),0); if(Math.abs(sum-store.meter)>0.00001) throw new Error(`节奏模板拍数不正确: ${m} = ${sum}`); }
+    lastPatternKey=`${a}-${b}-${store.meter}-${store.difficulty}`;
+  }
+  function noteOnsets() {
+    let events=[];
+    measures.forEach((m,bar)=> { let t=bar*store.meter; m.forEach(type=> { if(NOTE[type].kind.startsWith('rest')) { t+=duration(type); return; } events.push({beat:t,type,bar}); t+=duration(type); }); });
+    return events;
+  }
+  // Hand-drawn SVG notation: five staff lines, treble clef, correctly proportioned note values and rests.
+  function renderStaff(matchSet=null) {
+    if(!measures.length) makeMeasures();
+    const area=$('staffArea'); area.innerHTML='';
+    let globalIdx=0;
+    measures.forEach((measure,bar)=> {
+      const box=document.createElement('div'); box.className='measure';
+      const head=document.createElement('div'); head.className='measure-head'; head.innerHTML=`<span>第 ${bar+1} 小节 · ${store.meter}/4</span><span>每小节 ${store.meter} 拍</span>`;
+      box.appendChild(head);
+      const NS='http://www.w3.org/2000/svg';
+      const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 520 152');svg.setAttribute('role','img');svg.setAttribute('aria-label',`第${bar+1}小节：${measure.map(t=>({q:'四分音符',h:'二分音符',e:'八分音符',dq:'附点四分音符',rQ:'四分休止符',rE:'八分休止符'})[t]).join('、')}`);
+      function add(tag,attrs,klass,textContent){const el=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs||{})) el.setAttribute(k,String(v)); if(klass)el.setAttribute('class',klass);if(textContent!==undefined)el.textContent=textContent;svg.appendChild(el);return el;}
+      for(let i=0;i<5;i++)add('line',{x1:22,x2:501,y1:45+i*12,y2:45+i*12},'staff-line');
+      add('line',{x1:500,x2:500,y1:45,y2:93,stroke:'#384b46','stroke-width':2});
+      if(bar===0) {
+        // Stylized treble clef, purely decorative; duration is encoded by notehead/stems.
+        add('text',{x:23,y:101,'font-family':'Georgia, serif','font-size':64,fill:'#4c5d58'},null,'𝄞');
+        add('text',{x:70,y:67,'font-family':'Georgia, serif','font-size':17,fill:'#46564e'},null,String(store.meter));
+        add('text',{x:70,y:88,'font-family':'Georgia, serif','font-size':17,fill:'#46564e'},null,'4');
+      }
+      let t=0;
+      const notesLeft=bar===0?108:57;
+      const beatWidth=(478-notesLeft)/store.meter;
+      measure.forEach(type => {
+        const info=NOTE[type], x=notesLeft+(t+.24)*beatWidth, y=69;
+        const isRest=info.kind.startsWith('rest');
+        let paint='notemark';
+        if(!isRest && matchSet) paint=matchSet.has(globalIdx)?'notehit':'notemiss';
+        if(isRest && info.kind==='restQ') {
+          add('path',{d:`M ${x+1} 48 l -7 12 l 7 10 l -6 9 l 9 7 l -6 6`,fill:'none','stroke-width':3.5,'stroke-linejoin':'round'},'notemark');
+        } else if(isRest) {
+          add('circle',{cx:x-3,cy:68,r:4.2},'notemark');
+          add('path',{d:`M ${x} 68 L ${x+9} 53 L ${x+9} 90`,fill:'none','stroke-width':3},'notemark');
+        } else {
+          const half=info.kind==='half';
+          const el=add('ellipse',{cx:x,cy:y,rx:10,ry:6.4,transform:`rotate(-19 ${x} ${y})`,fill:half?'#fffefa':undefined,'stroke-width':half?2.2:1},paint);
+          if(half)el.style.fill='#fffefa';
+          add('line',{x1:x+8.5,x2:x+8.5,y1:y-1,y2:31,'stroke-width':2.3},paint);
+          if(info.kind==='eighth') add('path',{d:`M ${x+8.5} 31 Q ${x+30} 35 ${x+27} 51 Q ${x+25} 39 ${x+8.5} 39`,fill:'none','stroke-width':3},paint);
+          if(info.kind==='dotted')add('circle',{cx:x+20,cy:y-4,r:2.8},paint);
+          globalIdx++;
+        }
+        add('text',{x,y:125,'text-anchor':'middle'},'notation-label',info.short);
+        t+=info.dur;
+      });
+      add('text',{x:485,y:143,'text-anchor':'end','font-size':10,fill:'#8b9891'},null,'时值（拍）');
+      box.appendChild(svg);area.appendChild(box);
+    });
+  }
+  function ensureAudio() {
+    if(!audio) { const AC=window.AudioContext||window.webkitAudioContext; if(!AC) throw new Error('当前浏览器不支持 Web Audio。'); audio=new AC({latencyHint:'interactive'}); }
+    return audio.resume().then(()=>audio);
+  }
+  function clickAt(when,accent=false) {
+    const osc=audio.createOscillator(),gain=audio.createGain();
+    osc.type='sine';osc.frequency.setValueAtTime(accent?1000:760,when);
+    osc.frequency.exponentialRampToValueAtTime(accent?680:520,when+.048);
+    gain.gain.setValueAtTime(.0001,when);
+    gain.gain.exponentialRampToValueAtTime(accent?.18:.12,when+.003);
+    gain.gain.exponentialRampToValueAtTime(.0001,when+.075);
+    osc.connect(gain);gain.connect(audio.destination);osc.start(when);osc.stop(when+.083);
+    osc.onended=()=>{try{osc.disconnect();gain.disconnect();}catch{}};
+  }
+  function makeSession(mode) {
+    const meter=store.meter, beatSec=60/store.tempo;
+    let lead=meter, totalBeats, targets=[], sounds=[], phases=[];
+    if(mode==='pulse') {
+      totalBeats=lead+4*meter;
+      for(let b=0;b<totalBeats;b++)sounds.push(b);
+      for(let b=lead;b<totalBeats;b++)targets.push({sec:b*beatSec,label:String(b-lead+1)});
+      phases=[{start:0,end:lead,name:'预备拍 · 跟着声音准备'},{start:lead,end:totalBeats,name:'跟随节拍 · 点击打拍子'}];
+    } else if(mode==='silent') {
+      const silentStart=lead+2*meter,silentEnd=silentStart+2*meter;
+      totalBeats=silentEnd+meter;
+      for(let b=0;b<totalBeats;b++)if(b<silentStart||b>=silentEnd)sounds.push(b);
+      for(let b=silentStart;b<silentEnd;b++)targets.push({sec:b*beatSec,label:String(b-silentStart+1)});
+      phases=[{start:0,end:lead,name:'预备拍 · 听节拍'},{start:lead,end:silentStart,name:'有声引导 · 跟随两小节'},{start:silentStart,end:silentEnd,name:'静音保持 · 完全没有提示'},{start:silentEnd,end:totalBeats,name:'声音恢复 · 对照自己的节拍'}];
+    } else if(mode==='reading') {
+      totalBeats=lead+2*meter;
+      for(let b=0;b<lead;b++)sounds.push(b);
+      targets=noteOnsets().map((n,i)=>({sec:(lead+n.beat)*beatSec,label:String(i+1),noteIndex:i}));
+      phases=[{start:0,end:lead,name:'预备拍 · 看谱准备'},{start:lead,end:totalBeats,name:'按谱点击 · 没有节拍提示'}];
+    } else { // calibration
+      totalBeats=lead+3*meter;
+      for(let b=0;b<totalBeats;b++)sounds.push(b);
+      for(let b=lead;b<totalBeats;b++)targets.push({sec:b*beatSec,label:String(b-lead+1)});
+      phases=[{start:0,end:lead,name:'校准预备拍'},{start:lead,end:totalBeats,name:'校准中 · 随节拍稳定点击'}];
+    }
+    let spacing=Infinity;
+    for(let i=1;i<targets.length;i++)spacing=Math.min(spacing,(targets[i].sec-targets[i-1].sec)*1000);
+    const tolerance=mode==='calibration' ? Math.round(Math.min(350,beatSec*420,spacing*.48)) : Math.round(Math.min(210,beatSec*220,spacing*.43));
+    const activeStart=targets.length?targets[0].sec:0;
+    // Reading and silent-mode targets deliberately exclude rests/guide periods.
+    return {mode,meter,tempo:store.tempo,difficulty:store.difficulty,beatSec,lead,totalBeats,targets,sounds,phases,tolerance,activeStart,activeEnd:mode==='silent'? (lead+4*meter)*beatSec : totalBeats*beatSec, taps:[], nextSound:0, audioStart:0, perfStart:0,timer:0,raf:0,done:false};
+  }
+  function resetUI() { setText('phaseTag','等待开始'); setText('phaseText','音频会在开始后播放'); setText('tapCount','空格键 / 触屏'); setText('padBig','点击这里打拍子'); setText('padSmall','手机触摸 · 电脑按空格键'); }
+  async function begin(mode=store.mode) {
+    if(session) return;
+    const startedMode=mode;
+    $('resultCard').classList.remove('visible');
+    if(mode==='reading')renderStaff();
+    try {
+      await ensureAudio();
+      if(session) return;
+      session=makeSession(startedMode);
+      const s=session;
+      s.audioStart=audio.currentTime+.22;
+      s.perfStart=performance.now() + (s.audioStart-audio.currentTime)*1000;
+      // Audio time is used for sound scheduling. Performance time is used for pointer/key timestamps.
+      setRunning(true);
+      setText('statusText',startedMode==='calibration'?'校准进行中':'练习进行中');
+      setText('padBig','跟随节奏点击');
+      setText('padSmall','每次击打只记录一次');
+      $('statusText').closest('section').scrollIntoView({behavior:'auto',block:'start'});
+      scheduleAudio(s);
+      s.timer=window.setInterval(()=>scheduleAudio(s),25);
+      function tick(){if(session!==s||s.done)return; updateSession(s);s.raf=requestAnimationFrame(tick);}
+      tick();
+    } catch(err) {setText('statusText','音频启动失败：'+(err.message||String(err)));setRunning(false);}
+  }
+  function scheduleAudio(s) {
+    if(session!==s||s.done)return;
+    const ahead=audio.currentTime+.14;
+    while(s.nextSound<s.sounds.length && s.audioStart+s.sounds[s.nextSound]*s.beatSec<=ahead) {
+      const b=s.sounds[s.nextSound++];
+      clickAt(s.audioStart+b*s.beatSec,b%s.meter===0);
+    }
+  }
+  function updateSession(s) {
+    const elapsed=(audio.currentTime-s.audioStart),beatPos=elapsed/s.beatSec;
+    if(elapsed>=s.totalBeats*s.beatSec+.45){finish();return;}
+    if(elapsed<0) {setText('phaseText','即将开始');setText('phaseTag','准备');return;}
+    const current=s.phases.find(p=>beatPos>=p.start&&beatPos<p.end) || s.phases.at(-1);
+    const inCountIn=beatPos<s.lead;
+    let display=current.name;
+    if(inCountIn) display=`${current.name} · ${Math.floor(beatPos)+1}/${s.lead}`;
+    // Crucially, NO visual beat position, progress bar, or remaining time in silent/reading phases.
+    setText('phaseText',display);
+    const phaseTag = s.mode==='silent'&&beatPos>=s.lead+2*s.meter&&beatPos<s.lead+4*s.meter?'静音中':inCountIn?'预备中':s.mode==='reading'?'自主视读':s.mode==='calibration'?'校准中':'练习中';
+    setText('phaseTag',phaseTag);
+    setText('tapCount',`已击打 ${s.taps.length} 次`);
+  }
+  function tap(eventTime) {
+    if(!session||session.done)return;
+    const s=session;
+    const now=performance.now();
+    const inputTime=Number.isFinite(eventTime)&&Math.abs(now-eventTime)<2000?eventTime:now;
+    const t=inputTime-s.perfStart;
+    const begin=s.activeStart*1000-220;
+    const end=s.activeEnd*1000+Math.min(250,s.beatSec*300);
+    if(t>=begin&&t<=end) s.taps.push(t);
+    $('tapPad').classList.add('pressed');
+    window.setTimeout(()=>$('tapPad').classList.remove('pressed'),110);
+    setText('tapCount',`已击打 ${s.taps.length} 次`);
+  }
+  function stop() {
+    const s=session;if(!s)return;
+    s.done=true;clearInterval(s.timer);cancelAnimationFrame(s.raf);session=null;
+    // Discard already-scheduled sounds; resuming a suspended context would replay them.
+    if(audio){const old=audio;audio=null;old.close().catch(()=>{});}
+    setRunning(false);resetUI();setText('statusText','训练已停止，未保存结果。');
+  }
+  function matchEvents(targets,taps,tol,shift=0) {
+    // Ordered dynamic programming: prefer more matches, then lower total absolute timing error.
+    const A=targets.map(x=>x.sec*1000),B=taps.map(x=>x-shift),n=A.length,m=B.length;
+    const memo=new Map();
+    function solve(i,j) {
+      if(i>=n||j>=m)return {hit:0,cost:0,pairs:[]};
+      const key=i+','+j;if(memo.has(key))return memo.get(key);
+      const a=solve(i+1,j),b=solve(i,j+1);
+      let best=a.hit>b.hit||(a.hit===b.hit&&a.cost<=b.cost)?a:b;
+      const err=B[j]-A[i];
+      if(Math.abs(err)<=tol){const nxt=solve(i+1,j+1);const cand={hit:nxt.hit+1,cost:nxt.cost+Math.abs(err),pairs:[{i,j,error:err},...nxt.pairs]};if(cand.hit>best.hit||(cand.hit===best.hit&&cand.cost<best.cost))best=cand;}
+      memo.set(key,best);return best;
+    }
+    const best=solve(0,0),hit=best.pairs.length;
+    const errors=best.pairs.map(x=>x.error);
+    const mae=hit?errors.reduce((a,b)=>a+Math.abs(b),0)/hit:null;
+    const bias=hit?errors.reduce((a,b)=>a+b,0)/hit:null;
+    return {pairs:best.pairs,hit,total:n,extras:m-hit,misses:n-hit,mae,bias,hitRate:n?Math.round(hit/n*100):0,errors};
+  }
+  function finish() {
+    const s=session;if(!s||s.done)return;
+    s.done=true;clearInterval(s.timer);cancelAnimationFrame(s.raf);session=null;setRunning(false);
+    const raw=matchEvents(s.targets,s.taps,s.tolerance,s.mode==='calibration'?0:(store.calibrationMs||0));
+    if(s.mode==='calibration'){
+      let offset=null;
+      if(raw.hit>=Math.max(5,Math.ceil(raw.total*.5)))offset=median(raw.errors);
+      if(offset!==null){store.calibrationMs=round1(offset);persist();}
+      showCalibration(raw,offset);
+    } else {
+      const entry={date:new Date().toISOString(),mode:s.mode,meter:s.meter,tempo:s.tempo,difficulty:s.mode==='reading'?s.difficulty:null,hit:raw.hit,total:raw.total,hitRate:raw.hitRate,mae:raw.mae===null?null:round1(raw.mae),bias:raw.bias===null?null:round1(raw.bias),extras:raw.extras,tolerance:s.tolerance,calibration:store.calibrationMs};
+      store.history.unshift(entry);store.history=store.history.slice(0,200);persist();
+      showResult(s,raw);
+      if(s.mode==='reading')renderStaff(new Set(raw.pairs.map(p=>s.targets[p.i].noteIndex)));
+      updateHistory();
+    }
+    updateStats();setText('statusText','训练完成 · 下方查看成绩');setText('phaseTag','已完成');setText('phaseText','可以调整速度，或再练习一次。');setText('tapCount','空格键 / 触屏');
+  }
+  function metric(value,label){return `<div class="metric"><div class="number">${value}</div><div class="caption">${label}</div></div>`;}
+  function showCalibration(res,offset){
+    $('resultCard').classList.add('visible');setText('resultTitle','校准结果');
+    $('resultMetrics').innerHTML=metric(`${res.hit}/${res.total}`,'有效击打')+metric(offset===null?'—':`${sign(offset)} ms`,'测得系统性偏移')+metric(res.mae===null?'—':`${fmt(res.mae)} ms`,'原始平均绝对偏差');
+    setText('resultFeedback',offset===null?'有效击打不足，未保存校准；请稳定跟随节拍重试。':'已保存偏移。以后评估时将扣除此偏移；它包含设备输出、触控及个人习惯性提前或滞后，不能当成纯设备延迟。');
+    $('errorSummary').innerHTML='<div class="calib-note">推荐在同一设备、同一耳机或扬声器条件下校准。换设备或蓝牙耳机后重新校准；最好使用有线耳机或手机扬声器。</div>';
+  }
+  function showResult(s,res){
+    $('resultCard').classList.add('visible');setText('resultTitle',`${MODE_NAME[s.mode]} · 本次结果`);
+    $('resultMetrics').innerHTML=metric(`${res.hit}/${res.total}`,'正确匹配拍点')+metric(`${res.hitRate}%`,'命中率')+metric(res.mae===null?'—':`${fmt(res.mae)} ms`,'平均绝对时间偏差')+metric(res.bias===null?'—':`${sign(res.bias)} ms`,'平均提前 / 滞后')+metric(String(res.misses),'遗漏次数')+metric(String(res.extras),'额外击打');
+    let msg=`匹配容许误差 ±${s.tolerance} ms。正偏差表示较晚，负偏差表示较早。`;
+    if(s.mode==='silent') {
+      const e=res.pairs;
+      if(e.length>=2){const drift=e.at(-1).error-e[0].error;msg+=` 静音段首尾偏移变化 ${sign(drift)} ms（正值表示越打越慢）。`;}
+      msg+=' 静音段以外的点击不计分。';
+    }
+    if(s.mode==='reading')msg+=' 乐谱中绿色为命中，棕色为遗漏；休止符不得敲击。';
+    if(store.calibrationMs===null)msg+=' 尚未校准，系统性音频/触摸延迟可能影响偏差值。';
+    setText('resultFeedback',msg);
+    const match=new Map(res.pairs.map(p=>[p.i,p.error]));
+    let h='<div class="hint">每个目标拍点的误差（ms；— 为遗漏）</div><div class="errors">';
+    s.targets.forEach((t,i)=>{const err=match.get(i);h+=`<div class="error-cell ${err===undefined?'missing':''}"><span class="index">${i+1}</span><span class="val">${err===undefined?'—':sign(err)}</span></div>`;});
+    $('errorSummary').innerHTML=h+'</div>';
+  }
+  function updateHistory(){
+    const data=store.history.filter(h=>h.mode!=='calibration').slice(0,15);
+    if(!data.length){$('historyContent').innerHTML='<div class="empty">还没有完成记录。完成第一组练习后，这里会显示成绩。</div>';return;}
+    let html='<table class="history-table"><thead><tr><th>时间</th><th>模式</th><th>BPM</th><th>命中</th><th>偏差</th><th class="hide-small">多击</th></tr></thead><tbody>';
+    for(const h of data){const d=new Date(h.date);const date=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      html+=`<tr><td>${date}</td><td>${MODE_NAME[h.mode]||'训练'}</td><td>${h.tempo}</td><td>${h.hitRate}%</td><td>${h.mae===null?'—':fmt(h.mae)+'ms'}</td><td class="hide-small">${h.extras}</td></tr>`;
+    }
+    $('historyContent').innerHTML=html+'</tbody></table>';
+  }
+  function exportCSV(){
+    if(!store.history.length){setText('statusText','没有可导出的记录。');return;}
+    const fields=['date','mode','meter','tempo','difficulty','hit','total','hitRate','mae','bias','extras','tolerance','calibration'];
+    const rows=[fields.join(',')];
+    for(const h of store.history){rows.push(fields.map(f=>{const v=h[f]??'';return `"${String(v).replaceAll('"','""')}"`;}).join(','));}
+    const blob=new Blob(['\ufeff'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='rhythm-lab-history.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }
+  async function previewClick(){
+    if(session)return;
+    try {await ensureAudio();clickAt(audio.currentTime+.05,true);}
+    catch(err){setText('statusText','试听失败：'+(err.message||err));}
+  }
+  document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+  $('minusTempo').addEventListener('click',()=>{store.tempo=Math.max(40,store.tempo-5);persist();updateSettings();});
+  $('plusTempo').addEventListener('click',()=>{store.tempo=Math.min(160,store.tempo+5);persist();updateSettings();});
+  $('tempoSlider').addEventListener('input',e=>{store.tempo=Number(e.target.value);persist();updateSettings();});
+  $('meter').addEventListener('change',e=>{store.meter=Number(e.target.value);makeMeasures();persist();updateSettings();});
+  $('difficulty').addEventListener('change',e=>{store.difficulty=Number(e.target.value);makeMeasures();persist();updateSettings();});
+  $('startBtn').addEventListener('click',()=>begin());
+  $('stopBtn').addEventListener('click',stop);
+  $('regenerateBtn').addEventListener('click',()=>{if(session)return;makeMeasures();renderStaff();setText('statusText','已生成新节奏，准备开始。');});
+  $('calibrateBtn').addEventListener('click',()=>begin('calibration'));
+  $('testAudioBtn').addEventListener('click',previewClick);
+  $('tapPad').addEventListener('pointerdown',e=>{e.preventDefault();tap(e.timeStamp);});
+  document.addEventListener('keydown',e=>{if(e.code!=='Space'||e.repeat||!session)return; if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;e.preventDefault();tap(e.timeStamp);});
+  $('exportBtn').addEventListener('click',exportCSV);
+  $('clearBtn').addEventListener('click',()=>{if(session)return;if(!store.history.length)return;if(confirm('确定清除全部练习记录吗？此操作不可撤销。')){store.history=[];persist();updateHistory();updateStats();}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&session)stop();});
+  makeMeasures();updateSettings();updateHistory();
+  if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
