@@ -1,14 +1,24 @@
 {
-  "name": "节奏训练室 Rhythm Lab",
-  "short_name": "节奏训练室",
-  "description": "节拍保持、节奏视读和时间偏差反馈",
+  "name": "Rhythm Lab",
+  "short_name": "Rhythm Lab",
+  "description": "Offline rhythm and beat training · 8 languages",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f8f5ee",
   "theme_color": "#1f3035",
   "icons": [
-    {"src": "icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any maskable"},
-    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

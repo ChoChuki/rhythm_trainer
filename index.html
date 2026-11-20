@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1f3035">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="节奏训练室">
+  <meta name="apple-mobile-web-app-title" content="Rhythm Lab">
   <meta name="description" content="离线节拍保持、节奏视读与时间偏差反馈">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -26,6 +26,9 @@
     .eyebrow { font-family:Georgia,serif; font-size:.7rem; letter-spacing:.3em; color:#d5bd94; }
     h1 { font-size:clamp(1.65rem,4vw,2.35rem); letter-spacing:.06em; margin:8px 0 3px; font-weight:650; }
     .subtitle { color:#c6d4d1; font-size:.92rem; margin:0; }
+    .language-picker { position:absolute; top:18px; right:22px; z-index:2; display:flex; align-items:center; gap:7px; }
+    .language-picker label { font-size:.76rem; color:#e5eee6; }
+    .language-picker select { border:1px solid #ffffff55; background:#2c494a; color:#fffdfa; padding:5px 8px; min-height:34px; border-radius:9px; font-size:.79rem; max-width:150px; }
     .top-stats { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
     .pill { border:1px solid #ffffff38; padding:5px 10px; border-radius:100px; color:#e5f1e8; font-size:.78rem; }
     main { display:grid; gap:16px; margin-top:18px; }
@@ -98,7 +101,8 @@
     .hidden { display:none!important; }
     @media (max-width:600px) {
       .wrap { width:calc(100% - 20px); padding-top:10px; }
-      header { border-radius:17px; padding:21px 19px; }
+      header { border-radius:17px; padding:62px 19px 21px; }
+      .language-picker { right:13px; top:13px; }
       .card { border-radius:16px; padding:16px 13px; }
       .tabs { gap:3px; }
       .tab { padding:11px 3px; font-size:.88rem; }
@@ -123,89 +127,98 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">RHYTHM LAB · V1.0</div>
-    <h1>节奏训练室</h1>
-    <p class="subtitle">从听见拍子，到拥有自己的时间感。</p>
+    <div class="language-picker"><label for="langSelect" data-i18n="language">界面语言</label>
+      <select id="langSelect" aria-label="Language / Sprache / 言語">
+        <option value="zh-CN">简体中文</option><option value="en">English</option><option value="de">Deutsch</option><option value="it">Italiano</option><option value="fr">Français</option><option value="ja">日本語</option><option value="el">Ελληνικά</option><option value="zh-TW">繁體中文</option>
+      </select>
+    </div>
+    <div class="eyebrow">RHYTHM LAB · V1.1</div>
+    <h1 data-i18n="title">节奏训练室</h1>
+    <p class="subtitle" data-i18n="tagline">从听见拍子，到拥有自己的时间感。</p>
     <div class="top-stats"><span class="pill" id="statSessions">已完成 0 次</span><span class="pill" id="statRecent">最近命中率 —</span><span class="pill" id="statCal">校准偏移 未设置</span></div>
   </header>
   <main>
-    <section class="card" aria-label="训练模式">
-      <div class="tabs" role="tablist" aria-label="训练模式">
-        <button type="button" class="tab" role="tab" data-mode="pulse" aria-selected="true">① 跟随节拍</button>
-        <button type="button" class="tab" role="tab" data-mode="silent" aria-selected="false">② 静音保持</button>
-        <button type="button" class="tab" role="tab" data-mode="reading" aria-selected="false">③ 节奏视读</button>
+    <section class="card" aria-label="训练模式" data-i18n-aria="modeTitle">
+      <div class="tabs" role="tablist" aria-label="训练模式" data-i18n-aria="modeTitle">
+        <button type="button" class="tab" role="tab" data-mode="pulse" aria-selected="true" data-i18n="modePulse">① 跟随节拍</button>
+        <button type="button" class="tab" role="tab" data-mode="silent" aria-selected="false" data-i18n="modeSilent">② 静音保持</button>
+        <button type="button" class="tab" role="tab" data-mode="reading" aria-selected="false" data-i18n="modeReading">③ 节奏视读</button>
       </div>
       <p class="mode-intro" id="modeIntro">先听一小节预备拍；随后连续四小节跟着节拍点击。结束后查看命中率和时间误差。</p>
     </section>
-    <section class="card" aria-label="训练设置">
-      <h2 class="section-title">训练设置</h2>
+    <section class="card" aria-label="训练设置" data-i18n-aria="settings">
+      <h2 class="section-title" data-i18n="settings">训练设置</h2>
       <div class="settings">
         <div class="control-group">
-          <label class="small-label" for="tempoValue">速度 BPM</label>
-          <div class="stepper"><button type="button" id="minusTempo" aria-label="降低每分钟拍数">−</button><div><div class="tempo-value" id="tempoValue">80</div><div class="tempo-unit">每分钟拍数</div></div><button type="button" id="plusTempo" aria-label="提高每分钟拍数">+</button></div>
+          <label class="small-label" for="tempoValue" data-i18n="tempo">速度 BPM</label>
+          <div class="stepper"><button type="button" id="minusTempo" aria-label="降低每分钟拍数" data-i18n-aria="decrease">−</button><div><div class="tempo-value" id="tempoValue">80</div><div class="tempo-unit" data-i18n="perMinute">每分钟拍数</div></div><button type="button" id="plusTempo" aria-label="提高每分钟拍数" data-i18n-aria="increase">+</button></div>
         </div>
         <div class="control-group">
-          <label class="small-label" for="meter">拍号</label>
-          <select id="meter" aria-label="选择拍号"><option value="4">4/4</option><option value="3">3/4</option></select>
+          <label class="small-label" for="meter" data-i18n="meter">拍号</label>
+          <select id="meter" aria-label="选择拍号" data-i18n-aria="meterChoose"><option value="4">4/4</option><option value="3">3/4</option></select>
         </div>
         <div class="control-group" id="difficultyGroup">
-          <label class="small-label" for="difficulty">节奏难度</label>
-          <select id="difficulty"><option value="1">基础 · 四分/八分/二分</option><option value="2">进阶 · 附点/切分</option></select>
+          <label class="small-label" for="difficulty" data-i18n="difficulty">节奏难度</label>
+          <select id="difficulty"><option value="1" data-i18n="basic">基础 · 四分/八分/二分</option><option value="2" data-i18n="advanced">进阶 · 附点/切分</option></select>
         </div>
         <div class="setting-grow">
-          <label class="small-label" for="tempoSlider">细调速度</label>
-          <input type="range" id="tempoSlider" min="40" max="160" step="1" value="80" aria-label="速度滑块">
+          <label class="small-label" for="tempoSlider" data-i18n="fineTempo">细调速度</label>
+          <input type="range" id="tempoSlider" min="40" max="160" step="1" value="80" aria-label="速度滑块" data-i18n-aria="sliderAria">
         </div>
       </div>
       <div class="hint" id="settingsHint">声音仅用于预备与节拍引导；建议先用 60–80 BPM。</div>
       <div class="setup-actions">
-        <button type="button" class="btn primary" id="startBtn">▶ 开始训练</button>
-        <button type="button" class="btn danger hidden" id="stopBtn">■ 停止</button>
-        <button type="button" class="btn subtle" id="regenerateBtn">↻ 换一组节奏</button>
-        <button type="button" class="btn secondary" id="calibrateBtn">校准点击偏移</button>
-        <button type="button" class="btn secondary" id="testAudioBtn">试听节拍</button>
+        <button type="button" class="btn primary" id="startBtn" data-i18n="start">▶ 开始训练</button>
+        <button type="button" class="btn danger hidden" id="stopBtn" data-i18n="stop">■ 停止</button>
+        <button type="button" class="btn subtle" id="regenerateBtn" data-i18n="newPattern">↻ 换一组节奏</button>
+        <button type="button" class="btn secondary" id="calibrateBtn" data-i18n="calibrate">校准点击偏移</button>
+        <button type="button" class="btn secondary" id="testAudioBtn" data-i18n="preview">试听节拍</button>
       </div>
     </section>
-    <section class="card" aria-label="训练区">
+    <section class="card" aria-label="训练区" data-i18n-aria="practice">
       <div class="practice-header">
-        <div><h2 class="section-title" style="margin:0 0 5px">训练区</h2><div class="status" id="statusText" role="status" aria-live="polite">准备就绪 · 点击“开始训练”</div></div>
+        <div><h2 class="section-title" style="margin:0 0 5px" data-i18n="practice">训练区</h2><div class="status" id="statusText" role="status" aria-live="polite">准备就绪 · 点击“开始训练”</div></div>
         <span class="tag" id="phaseTag">等待开始</span>
       </div>
-      <div class="staff-area hidden" id="staffArea" aria-label="节奏谱"></div>
+      <div class="staff-area hidden" id="staffArea" aria-label="节奏谱" data-i18n-aria="staffAria"></div>
       <div class="practice-board">
         <div class="session-top"><span class="phase" id="phaseText">音频会在开始后播放</span><span class="elapsed" id="tapCount">空格键 / 触屏</span></div>
-        <button type="button" id="tapPad" class="tap-pad" aria-label="节奏点击板：触摸屏幕或按空格键">
+        <button type="button" id="tapPad" class="tap-pad" aria-label="节奏点击板：触摸屏幕或按空格键" data-i18n-aria="padAria">
           <span class="tap-big" id="padBig">点击这里打拍子</span>
           <span class="tap-small" id="padSmall">手机触摸 · 电脑按空格键</span>
         </button>
       </div>
       <p class="hint" id="modeHint">训练期间不要切换到其他应用；iPhone 请保持屏幕点亮。</p>
     </section>
-    <section class="card results" id="resultCard" aria-label="训练结果">
-      <h2 class="section-title" id="resultTitle">本次结果</h2>
+    <section class="card results" id="resultCard" aria-label="训练结果" data-i18n-aria="results">
+      <h2 class="section-title" id="resultTitle" data-i18n="results">本次结果</h2>
       <div class="results-grid" id="resultMetrics"></div>
       <p class="feedback" id="resultFeedback"></p>
       <div id="errorSummary"></div>
     </section>
-    <section class="card" aria-label="练习记录">
-      <div class="history-head"><h2 class="section-title">练习记录</h2><div class="history-actions"><button class="btn secondary" type="button" id="exportBtn">导出 CSV</button><button class="btn secondary" type="button" id="clearBtn">清除记录</button></div></div>
+    <section class="card" aria-label="练习记录" data-i18n-aria="history">
+      <div class="history-head"><h2 class="section-title" data-i18n="history">练习记录</h2><div class="history-actions"><button class="btn secondary" type="button" id="exportBtn" data-i18n="export">导出 CSV</button><button class="btn secondary" type="button" id="clearBtn" data-i18n="clear">清除记录</button></div></div>
       <div id="historyContent"></div>
-      <p class="hint">记录只保存在当前浏览器，不会上传。Safari 无痕浏览或清除网站数据后可能丢失；需要长期保存请定期导出 CSV。</p>
+      <p class="hint" data-i18n="privacy">记录只保存在当前浏览器，不会上传。Safari 无痕浏览或清除网站数据后可能丢失；需要长期保存请定期导出 CSV。</p>
     </section>
   </main>
-  <p class="footer">Rhythm Lab v1.0 · 离线可用 · 仅供日常节奏练习，不代替专业演奏时值测量</p>
+  <p class="footer" data-i18n="footer">Rhythm Lab v1.0 · 离线可用 · 仅供日常节奏练习，不代替专业演奏时值测量</p>
 </div>
+<script src="i18n.js"></script>
 <script>
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
   const KEY = 'rhythm_lab_v1';
-  const INTRO = {
-    pulse:'先听一小节预备拍；随后连续四小节跟着节拍点击。结束后查看命中率和时间误差。',
-    silent:'先听一小节预备拍，再跟随两小节；随后两小节完全静音，继续点击，最后一小节恢复声音。只评分静音段。',
-    reading:'先观察两小节节奏谱，听完一小节预备拍后，根据谱面自行点击。正式练习时没有节拍声或移动提示。'
+  const I18N = window.RHYTHM_I18N;
+  const t = (key,vars={}) => {
+    let msg=(I18N.translations[key]||{})[store?.language] || (I18N.translations[key]||{})['zh-CN'] || key;
+    return msg.replace(/\{(\w+)\}/g,(_,$1)=>String(vars[$1]??''));
   };
-  const MODE_NAME = { pulse:'跟随节拍',silent:'静音保持',reading:'节奏视读',calibration:'点击校准' };
+  const INTRO = {
+    pulse:'introPulse', silent:'introSilent', reading:'introReading'
+  };
+  const MODE_NAME = { pulse:'modePulse',silent:'modeSilent',reading:'modeReading',calibration:'modeCalibration' };
   const NOTE = {
     q:{dur:1,kind:'note',short:'1'},h:{dur:2,kind:'half',short:'2'},e:{dur:.5,kind:'eighth',short:'½'},
     dq:{dur:1.5,kind:'dotted',short:'1½'},rQ:{dur:1,kind:'restQ',short:'休1'},rE:{dur:.5,kind:'restE',short:'休½'}
@@ -221,17 +234,20 @@
     }
   };
 
-  const defaultStore = { tempo:80,meter:4,difficulty:1,mode:'pulse',calibrationMs:null,history:[] };
+  const defaultStore = { tempo:80,meter:4,difficulty:1,mode:'pulse',calibrationMs:null,history:[],language:null };
   let saved;
   try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch { saved = {}; }
   const store = { ...defaultStore,...saved };
+  const browserLang=(navigator.languages||[navigator.language||'zh-CN']).find(x=>I18N.languages.includes(x)) || (navigator.language||'').split('-')[0];
+  const autoLang=I18N.languages.includes(browserLang)?browserLang:'zh-CN';
+  store.language=I18N.languages.includes(store.language)?store.language:autoLang;
   store.history = Array.isArray(store.history) ? store.history.slice(0,200) : [];
   store.tempo = Math.max(40,Math.min(160,Number(store.tempo)||80));
   store.meter = [3,4].includes(Number(store.meter)) ? Number(store.meter) : 4;
   store.difficulty = [1,2].includes(Number(store.difficulty)) ? Number(store.difficulty) : 1;
   store.mode = INTRO[store.mode] ? store.mode : 'pulse';
   store.calibrationMs = Number.isFinite(store.calibrationMs) ? store.calibrationMs : null;
-  let audio = null, session = null, measures = [], lastPatternKey = '';
+  let audio = null, session = null, measures = [], lastPatternKey = '', lastOutcome=null,viewState='ready';
   const settingsControls = [...document.querySelectorAll('.tab'), $('minusTempo'),$('plusTempo'),$('tempoSlider'),$('meter'),$('difficulty'),$('startBtn'),$('regenerateBtn'),$('calibrateBtn'),$('testAudioBtn')];
   const duration = type => NOTE[type].dur;
   const fmt = n => Number(n).toFixed(0);
@@ -240,6 +256,36 @@
   const round1 = n => Math.round(n*10)/10;
   function persist() { try { localStorage.setItem(KEY,JSON.stringify(store)); } catch {} }
   function setText(id,text) { $(id).textContent = text; }
+  function translateStatic() {
+    document.documentElement.lang=store.language;
+    document.title=t('title')+' · Rhythm Lab';
+    document.querySelector('meta[name="apple-mobile-web-app-title"]').content='Rhythm Lab';
+    document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+    document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18nAria)));
+    // Results headings are also updated when a completed session is revisited.
+    setText('resultTitle',t('results'));
+
+    $('langSelect').value=store.language;
+  }
+  function switchLanguage(language) {
+    if(!I18N.languages.includes(language))return;
+    store.language=language;persist();translateStatic();updateSettings();updateHistory();
+    if(session){
+      setText('statusText',t(session.mode==='calibration'?'statusCalActive':'statusActive'));
+      setText('padBig',t('padActive'));setText('padSmall',t('padActiveSmall'));
+      updateSession(session);
+    } else {
+      const stateKey={ready:'ready',stopped:'statusStopped',done:'statusDone',pattern:'newRhythmStatus'}[viewState]||'ready';
+      setText('statusText',t(stateKey));
+      if(viewState==='done') {resetUI();setText('phaseTag',t('doneTag'));setText('phaseText',t('phaseDone'));}
+      else resetUI();
+    }
+    if(lastOutcome){
+      if(lastOutcome.calibration)showCalibration(lastOutcome.raw,lastOutcome.offset);
+      else {showResult(lastOutcome.session,lastOutcome.raw);if(lastOutcome.session.mode==='reading')renderStaff(new Set(lastOutcome.raw.pairs.map(p=>lastOutcome.session.targets[p.i].noteIndex)));}
+    }
+  }
+
   function setRunning(running) {
     settingsControls.forEach(el=>el.disabled=running);
     $('startBtn').classList.toggle('hidden',running);
@@ -251,22 +297,22 @@
     setText('tempoValue',store.tempo); $('tempoSlider').value=store.tempo;
     $('meter').value=String(store.meter); $('difficulty').value=String(store.difficulty);
     document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.mode===store.mode)));
-    setText('modeIntro',INTRO[store.mode]);
+    setText('modeIntro',t(INTRO[store.mode]));
     $('difficultyGroup').classList.toggle('hidden',store.mode!=='reading');
     $('regenerateBtn').classList.toggle('hidden',store.mode!=='reading');
     $('staffArea').classList.toggle('hidden',store.mode!=='reading');
-    setText('modeHint',store.mode==='silent' ? '静音段不显示节拍位置或倒计时，防止视觉提示代替内部节拍。' : store.mode==='reading' ? '音符均记在五线谱中间的 B 线上，只考节奏。休止符期间不要点击。' : '训练期间不要切换到其他应用；iPhone 请保持屏幕点亮。');
-    setText('settingsHint',store.mode==='reading'?'基础：四分、八分、二分音符及四分休止；进阶：附点、八分休止与切分。':'声音仅用于预备与引导；建议先用 60–80 BPM。');
+    setText('modeHint',t(store.mode==='silent' ? 'modeHintSilent' : store.mode==='reading' ? 'modeHintReading' : 'modeHintPulse'));
+    setText('settingsHint',t(store.mode==='reading'?'hintSettingsReading':'hintSettings'));
     updateStats();
     if (store.mode==='reading') renderStaff();
   }
   function updateStats() {
     const recent = store.history.find(h=>h.mode!=='calibration');
-    setText('statSessions',`已完成 ${store.history.filter(h=>h.mode!=='calibration').length} 次`);
-    setText('statRecent',`最近命中率 ${recent ? recent.hitRate+'%' : '—'}`);
-    setText('statCal',`校准偏移 ${store.calibrationMs===null?'未设置':sign(store.calibrationMs)+' ms'}`);
+    setText('statSessions',t('sessionsStat',{n:store.history.filter(h=>h.mode!=='calibration').length}));
+    setText('statRecent',t('recentStat',{n:recent ? recent.hitRate+'%' : '—'}));
+    setText('statCal',t('calStat',{n:store.calibrationMs===null?t('notSet'):sign(store.calibrationMs)+' ms'}));
   }
-  function setMode(mode) { if(session||!INTRO[mode]) return; store.mode=mode; persist(); updateSettings(); setText('statusText','准备就绪 · 点击“开始训练”'); setText('phaseTag','等待开始'); setText('phaseText','音频会在开始后播放'); }
+  function setMode(mode) { if(session||!INTRO[mode]) return; store.mode=mode; lastOutcome=null;viewState='ready';$('resultCard').classList.remove('visible');persist(); updateSettings(); resetUI();setText('statusText',t('ready')); }
   function makeMeasures() {
     const pool=TEMPLATES[store.meter][store.difficulty];
     let a,b,key;
@@ -288,10 +334,10 @@
     let globalIdx=0;
     measures.forEach((measure,bar)=> {
       const box=document.createElement('div'); box.className='measure';
-      const head=document.createElement('div'); head.className='measure-head'; head.innerHTML=`<span>第 ${bar+1} 小节 · ${store.meter}/4</span><span>每小节 ${store.meter} 拍</span>`;
+      const head=document.createElement('div'); head.className='measure-head'; head.innerHTML=`<span>${t('measureHead',{n:bar+1,m:store.meter})}</span><span>${t('beatsPerBar',{n:store.meter})}</span>`;
       box.appendChild(head);
       const NS='http://www.w3.org/2000/svg';
-      const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 520 152');svg.setAttribute('role','img');svg.setAttribute('aria-label',`第${bar+1}小节：${measure.map(t=>({q:'四分音符',h:'二分音符',e:'八分音符',dq:'附点四分音符',rQ:'四分休止符',rE:'八分休止符'})[t]).join('、')}`);
+      const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 520 152');svg.setAttribute('role','img');svg.setAttribute('aria-label',t('measureAria',{n:bar+1,notes:measure.map(x=>t(({q:'quarter',h:'half',e:'eighth',dq:'dotted',rQ:'restQuarter',rE:'restEighth'})[x])).join('、')}));
       function add(tag,attrs,klass,textContent){const el=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs||{})) el.setAttribute(k,String(v)); if(klass)el.setAttribute('class',klass);if(textContent!==undefined)el.textContent=textContent;svg.appendChild(el);return el;}
       for(let i=0;i<5;i++)add('line',{x1:22,x2:501,y1:45+i*12,y2:45+i*12},'staff-line');
       add('line',{x1:500,x2:500,y1:45,y2:93,stroke:'#384b46','stroke-width':2});
@@ -301,11 +347,11 @@
         add('text',{x:70,y:67,'font-family':'Georgia, serif','font-size':17,fill:'#46564e'},null,String(store.meter));
         add('text',{x:70,y:88,'font-family':'Georgia, serif','font-size':17,fill:'#46564e'},null,'4');
       }
-      let t=0;
+      let beatCursor=0;
       const notesLeft=bar===0?108:57;
       const beatWidth=(478-notesLeft)/store.meter;
       measure.forEach(type => {
-        const info=NOTE[type], x=notesLeft+(t+.24)*beatWidth, y=69;
+        const info=NOTE[type], x=notesLeft+(beatCursor+.24)*beatWidth, y=69;
         const isRest=info.kind.startsWith('rest');
         let paint='notemark';
         if(!isRest && matchSet) paint=matchSet.has(globalIdx)?'notehit':'notemiss';
@@ -323,15 +369,15 @@
           if(info.kind==='dotted')add('circle',{cx:x+20,cy:y-4,r:2.8},paint);
           globalIdx++;
         }
-        add('text',{x,y:125,'text-anchor':'middle'},'notation-label',info.short);
-        t+=info.dur;
+        add('text',{x,y:125,'text-anchor':'middle'},'notation-label',isRest?t('restShort')+info.short.slice(1):info.short);
+        beatCursor+=info.dur;
       });
-      add('text',{x:485,y:143,'text-anchor':'end','font-size':10,fill:'#8b9891'},null,'时值（拍）');
+      add('text',{x:485,y:143,'text-anchor':'end','font-size':10,fill:'#8b9891'},null,t('beatUnits'));
       box.appendChild(svg);area.appendChild(box);
     });
   }
   function ensureAudio() {
-    if(!audio) { const AC=window.AudioContext||window.webkitAudioContext; if(!AC) throw new Error('当前浏览器不支持 Web Audio。'); audio=new AC({latencyHint:'interactive'}); }
+    if(!audio) { const AC=window.AudioContext||window.webkitAudioContext; if(!AC) throw new Error(t('noWebAudio')); audio=new AC({latencyHint:'interactive'}); }
     return audio.resume().then(()=>audio);
   }
   function clickAt(when,accent=false) {
@@ -351,23 +397,23 @@
       totalBeats=lead+4*meter;
       for(let b=0;b<totalBeats;b++)sounds.push(b);
       for(let b=lead;b<totalBeats;b++)targets.push({sec:b*beatSec,label:String(b-lead+1)});
-      phases=[{start:0,end:lead,name:'预备拍 · 跟着声音准备'},{start:lead,end:totalBeats,name:'跟随节拍 · 点击打拍子'}];
+      phases=[{start:0,end:lead,key:'phasePulseLead'},{start:lead,end:totalBeats,key:'phasePulseActive'}];
     } else if(mode==='silent') {
       const silentStart=lead+2*meter,silentEnd=silentStart+2*meter;
       totalBeats=silentEnd+meter;
       for(let b=0;b<totalBeats;b++)if(b<silentStart||b>=silentEnd)sounds.push(b);
       for(let b=silentStart;b<silentEnd;b++)targets.push({sec:b*beatSec,label:String(b-silentStart+1)});
-      phases=[{start:0,end:lead,name:'预备拍 · 听节拍'},{start:lead,end:silentStart,name:'有声引导 · 跟随两小节'},{start:silentStart,end:silentEnd,name:'静音保持 · 完全没有提示'},{start:silentEnd,end:totalBeats,name:'声音恢复 · 对照自己的节拍'}];
+      phases=[{start:0,end:lead,key:'phaseSilentLead'},{start:lead,end:silentStart,key:'phaseSilentGuide'},{start:silentStart,end:silentEnd,key:'phaseSilentMute'},{start:silentEnd,end:totalBeats,key:'phaseSilentReturn'}];
     } else if(mode==='reading') {
       totalBeats=lead+2*meter;
       for(let b=0;b<lead;b++)sounds.push(b);
       targets=noteOnsets().map((n,i)=>({sec:(lead+n.beat)*beatSec,label:String(i+1),noteIndex:i}));
-      phases=[{start:0,end:lead,name:'预备拍 · 看谱准备'},{start:lead,end:totalBeats,name:'按谱点击 · 没有节拍提示'}];
+      phases=[{start:0,end:lead,key:'phaseReadingLead'},{start:lead,end:totalBeats,key:'phaseReadingActive'}];
     } else { // calibration
       totalBeats=lead+3*meter;
       for(let b=0;b<totalBeats;b++)sounds.push(b);
       for(let b=lead;b<totalBeats;b++)targets.push({sec:b*beatSec,label:String(b-lead+1)});
-      phases=[{start:0,end:lead,name:'校准预备拍'},{start:lead,end:totalBeats,name:'校准中 · 随节拍稳定点击'}];
+      phases=[{start:0,end:lead,key:'phaseCalLead'},{start:lead,end:totalBeats,key:'phaseCalActive'}];
     }
     let spacing=Infinity;
     for(let i=1;i<targets.length;i++)spacing=Math.min(spacing,(targets[i].sec-targets[i-1].sec)*1000);
@@ -376,11 +422,11 @@
     // Reading and silent-mode targets deliberately exclude rests/guide periods.
     return {mode,meter,tempo:store.tempo,difficulty:store.difficulty,beatSec,lead,totalBeats,targets,sounds,phases,tolerance,activeStart,activeEnd:mode==='silent'? (lead+4*meter)*beatSec : totalBeats*beatSec, taps:[], nextSound:0, audioStart:0, perfStart:0,timer:0,raf:0,done:false};
   }
-  function resetUI() { setText('phaseTag','等待开始'); setText('phaseText','音频会在开始后播放'); setText('tapCount','空格键 / 触屏'); setText('padBig','点击这里打拍子'); setText('padSmall','手机触摸 · 电脑按空格键'); }
+  function resetUI() { setText('phaseTag',t('waiting')); setText('phaseText',t('initialPhase')); setText('tapCount',t('spaceTouch')); setText('padBig',t('padBig')); setText('padSmall',t('padSmall')); }
   async function begin(mode=store.mode) {
     if(session) return;
     const startedMode=mode;
-    $('resultCard').classList.remove('visible');
+    $('resultCard').classList.remove('visible');lastOutcome=null;
     if(mode==='reading')renderStaff();
     try {
       await ensureAudio();
@@ -390,16 +436,16 @@
       s.audioStart=audio.currentTime+.22;
       s.perfStart=performance.now() + (s.audioStart-audio.currentTime)*1000;
       // Audio time is used for sound scheduling. Performance time is used for pointer/key timestamps.
-      setRunning(true);
-      setText('statusText',startedMode==='calibration'?'校准进行中':'练习进行中');
-      setText('padBig','跟随节奏点击');
-      setText('padSmall','每次击打只记录一次');
+      setRunning(true);viewState='active';
+      setText('statusText',t(startedMode==='calibration'?'statusCalActive':'statusActive'));
+      setText('padBig',t('padActive'));
+      setText('padSmall',t('padActiveSmall'));
       $('statusText').closest('section').scrollIntoView({behavior:'auto',block:'start'});
       scheduleAudio(s);
       s.timer=window.setInterval(()=>scheduleAudio(s),25);
       function tick(){if(session!==s||s.done)return; updateSession(s);s.raf=requestAnimationFrame(tick);}
       tick();
-    } catch(err) {setText('statusText','音频启动失败：'+(err.message||String(err)));setRunning(false);}
+    } catch(err) {setText('statusText',t('audioFail',{msg:err.message||String(err)}));setRunning(false);}
   }
   function scheduleAudio(s) {
     if(session!==s||s.done)return;
@@ -412,16 +458,16 @@
   function updateSession(s) {
     const elapsed=(audio.currentTime-s.audioStart),beatPos=elapsed/s.beatSec;
     if(elapsed>=s.totalBeats*s.beatSec+.45){finish();return;}
-    if(elapsed<0) {setText('phaseText','即将开始');setText('phaseTag','准备');return;}
+    if(elapsed<0) {setText('phaseText',t('aboutToStart'));setText('phaseTag',t('preparing'));return;}
     const current=s.phases.find(p=>beatPos>=p.start&&beatPos<p.end) || s.phases.at(-1);
     const inCountIn=beatPos<s.lead;
-    let display=current.name;
-    if(inCountIn) display=`${current.name} · ${Math.floor(beatPos)+1}/${s.lead}`;
+    let display=t(current.key);
+    if(inCountIn) display+=` · ${Math.floor(beatPos)+1}/${s.lead}`;
     // Crucially, NO visual beat position, progress bar, or remaining time in silent/reading phases.
     setText('phaseText',display);
-    const phaseTag = s.mode==='silent'&&beatPos>=s.lead+2*s.meter&&beatPos<s.lead+4*s.meter?'静音中':inCountIn?'预备中':s.mode==='reading'?'自主视读':s.mode==='calibration'?'校准中':'练习中';
-    setText('phaseTag',phaseTag);
-    setText('tapCount',`已击打 ${s.taps.length} 次`);
+    const phaseTag = s.mode==='silent'&&beatPos>=s.lead+2*s.meter&&beatPos<s.lead+4*s.meter?'muteTag':inCountIn?'leadTag':s.mode==='reading'?'readingTag':s.mode==='calibration'?'calTag':'activeTag';
+    setText('phaseTag',t(phaseTag));
+    setText('tapCount',t('tapCount',{n:s.taps.length}));
   }
   function tap(eventTime) {
     if(!session||session.done)return;
@@ -434,14 +480,14 @@
     if(t>=begin&&t<=end) s.taps.push(t);
     $('tapPad').classList.add('pressed');
     window.setTimeout(()=>$('tapPad').classList.remove('pressed'),110);
-    setText('tapCount',`已击打 ${s.taps.length} 次`);
+    setText('tapCount',t('tapCount',{n:s.taps.length}));
   }
   function stop() {
     const s=session;if(!s)return;
     s.done=true;clearInterval(s.timer);cancelAnimationFrame(s.raf);session=null;
     // Discard already-scheduled sounds; resuming a suspended context would replay them.
     if(audio){const old=audio;audio=null;old.close().catch(()=>{});}
-    setRunning(false);resetUI();setText('statusText','训练已停止，未保存结果。');
+    setRunning(false);viewState='stopped';lastOutcome=null;resetUI();setText('statusText',t('statusStopped'));
   }
   function matchEvents(targets,taps,tol,shift=0) {
     // Ordered dynamic programming: prefer more matches, then lower total absolute timing error.
@@ -470,51 +516,51 @@
       let offset=null;
       if(raw.hit>=Math.max(5,Math.ceil(raw.total*.5)))offset=median(raw.errors);
       if(offset!==null){store.calibrationMs=round1(offset);persist();}
-      showCalibration(raw,offset);
+      lastOutcome={calibration:true,raw,offset};showCalibration(raw,offset);
     } else {
       const entry={date:new Date().toISOString(),mode:s.mode,meter:s.meter,tempo:s.tempo,difficulty:s.mode==='reading'?s.difficulty:null,hit:raw.hit,total:raw.total,hitRate:raw.hitRate,mae:raw.mae===null?null:round1(raw.mae),bias:raw.bias===null?null:round1(raw.bias),extras:raw.extras,tolerance:s.tolerance,calibration:store.calibrationMs};
       store.history.unshift(entry);store.history=store.history.slice(0,200);persist();
-      showResult(s,raw);
+      lastOutcome={calibration:false,session:s,raw};showResult(s,raw);
       if(s.mode==='reading')renderStaff(new Set(raw.pairs.map(p=>s.targets[p.i].noteIndex)));
       updateHistory();
     }
-    updateStats();setText('statusText','训练完成 · 下方查看成绩');setText('phaseTag','已完成');setText('phaseText','可以调整速度，或再练习一次。');setText('tapCount','空格键 / 触屏');
+    viewState='done';resetUI();updateStats();setText('statusText',t('statusDone'));setText('phaseTag',t('doneTag'));setText('phaseText',t('phaseDone'));setText('tapCount',t('spaceTouch'));
   }
   function metric(value,label){return `<div class="metric"><div class="number">${value}</div><div class="caption">${label}</div></div>`;}
   function showCalibration(res,offset){
-    $('resultCard').classList.add('visible');setText('resultTitle','校准结果');
-    $('resultMetrics').innerHTML=metric(`${res.hit}/${res.total}`,'有效击打')+metric(offset===null?'—':`${sign(offset)} ms`,'测得系统性偏移')+metric(res.mae===null?'—':`${fmt(res.mae)} ms`,'原始平均绝对偏差');
-    setText('resultFeedback',offset===null?'有效击打不足，未保存校准；请稳定跟随节拍重试。':'已保存偏移。以后评估时将扣除此偏移；它包含设备输出、触控及个人习惯性提前或滞后，不能当成纯设备延迟。');
-    $('errorSummary').innerHTML='<div class="calib-note">推荐在同一设备、同一耳机或扬声器条件下校准。换设备或蓝牙耳机后重新校准；最好使用有线耳机或手机扬声器。</div>';
+    $('resultCard').classList.add('visible');setText('resultTitle',t('calResults'));
+    $('resultMetrics').innerHTML=metric(`${res.hit}/${res.total}`,t('validTaps'))+metric(offset===null?'—':`${sign(offset)} ms`,t('measuredOffset'))+metric(res.mae===null?'—':`${fmt(res.mae)} ms`,t('rawMae'));
+    setText('resultFeedback',t(offset===null?'calFail':'calSaved'));
+    $('errorSummary').innerHTML='<div class="calib-note">'+t('calNote')+'</div>';
   }
   function showResult(s,res){
-    $('resultCard').classList.add('visible');setText('resultTitle',`${MODE_NAME[s.mode]} · 本次结果`);
-    $('resultMetrics').innerHTML=metric(`${res.hit}/${res.total}`,'正确匹配拍点')+metric(`${res.hitRate}%`,'命中率')+metric(res.mae===null?'—':`${fmt(res.mae)} ms`,'平均绝对时间偏差')+metric(res.bias===null?'—':`${sign(res.bias)} ms`,'平均提前 / 滞后')+metric(String(res.misses),'遗漏次数')+metric(String(res.extras),'额外击打');
-    let msg=`匹配容许误差 ±${s.tolerance} ms。正偏差表示较晚，负偏差表示较早。`;
+    $('resultCard').classList.add('visible');setText('resultTitle',t('resultHeading',{mode:t(MODE_NAME[s.mode])}));
+    $('resultMetrics').innerHTML=metric(`${res.hit}/${res.total}`,t('matched'))+metric(`${res.hitRate}%`,t('hitRate'))+metric(res.mae===null?'—':`${fmt(res.mae)} ms`,t('meanAbs'))+metric(res.bias===null?'—':`${sign(res.bias)} ms`,t('meanBias'))+metric(String(res.misses),t('misses'))+metric(String(res.extras),t('extras'));
+    let msg=t('resultExplanation',{n:s.tolerance});
     if(s.mode==='silent') {
       const e=res.pairs;
-      if(e.length>=2){const drift=e.at(-1).error-e[0].error;msg+=` 静音段首尾偏移变化 ${sign(drift)} ms（正值表示越打越慢）。`;}
-      msg+=' 静音段以外的点击不计分。';
+      if(e.length>=2){const drift=e.at(-1).error-e[0].error;msg+=' '+t('silentDrift',{n:sign(drift)});}
+      msg+=' '+t('silentOutside');
     }
-    if(s.mode==='reading')msg+=' 乐谱中绿色为命中，棕色为遗漏；休止符不得敲击。';
-    if(store.calibrationMs===null)msg+=' 尚未校准，系统性音频/触摸延迟可能影响偏差值。';
+    if(s.mode==='reading')msg+=' '+t('readingFeedback');
+    if(store.calibrationMs===null)msg+=' '+t('notCalibrated');
     setText('resultFeedback',msg);
     const match=new Map(res.pairs.map(p=>[p.i,p.error]));
-    let h='<div class="hint">每个目标拍点的误差（ms；— 为遗漏）</div><div class="errors">';
+    let h='<div class="hint">'+t('errorHead')+'</div><div class="errors">';
     s.targets.forEach((t,i)=>{const err=match.get(i);h+=`<div class="error-cell ${err===undefined?'missing':''}"><span class="index">${i+1}</span><span class="val">${err===undefined?'—':sign(err)}</span></div>`;});
     $('errorSummary').innerHTML=h+'</div>';
   }
   function updateHistory(){
     const data=store.history.filter(h=>h.mode!=='calibration').slice(0,15);
-    if(!data.length){$('historyContent').innerHTML='<div class="empty">还没有完成记录。完成第一组练习后，这里会显示成绩。</div>';return;}
-    let html='<table class="history-table"><thead><tr><th>时间</th><th>模式</th><th>BPM</th><th>命中</th><th>偏差</th><th class="hide-small">多击</th></tr></thead><tbody>';
+    if(!data.length){$('historyContent').innerHTML='<div class="empty">'+t('historyEmpty')+'</div>';return;}
+    let html='<table class="history-table"><thead><tr><th>'+t('histTime')+'</th><th>'+t('histMode')+'</th><th>BPM</th><th>'+t('histHit')+'</th><th>'+t('histError')+'</th><th class="hide-small">'+t('histExtra')+'</th></tr></thead><tbody>';
     for(const h of data){const d=new Date(h.date);const date=`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-      html+=`<tr><td>${date}</td><td>${MODE_NAME[h.mode]||'训练'}</td><td>${h.tempo}</td><td>${h.hitRate}%</td><td>${h.mae===null?'—':fmt(h.mae)+'ms'}</td><td class="hide-small">${h.extras}</td></tr>`;
+      html+=`<tr><td>${date}</td><td>${t(MODE_NAME[h.mode]||'modeGeneric')}</td><td>${h.tempo}</td><td>${h.hitRate}%</td><td>${h.mae===null?'—':fmt(h.mae)+'ms'}</td><td class="hide-small">${h.extras}</td></tr>`;
     }
     $('historyContent').innerHTML=html+'</tbody></table>';
   }
   function exportCSV(){
-    if(!store.history.length){setText('statusText','没有可导出的记录。');return;}
+    if(!store.history.length){setText('statusText',t('exportEmpty'));return;}
     const fields=['date','mode','meter','tempo','difficulty','hit','total','hitRate','mae','bias','extras','tolerance','calibration'];
     const rows=[fields.join(',')];
     for(const h of store.history){rows.push(fields.map(f=>{const v=h[f]??'';return `"${String(v).replaceAll('"','""')}"`;}).join(','));}
@@ -524,8 +570,9 @@
   async function previewClick(){
     if(session)return;
     try {await ensureAudio();clickAt(audio.currentTime+.05,true);}
-    catch(err){setText('statusText','试听失败：'+(err.message||err));}
+    catch(err){setText('statusText',t('previewFail',{msg:err.message||err}));}
   }
+  $('langSelect').addEventListener('change',e=>switchLanguage(e.target.value));
   document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
   $('minusTempo').addEventListener('click',()=>{store.tempo=Math.max(40,store.tempo-5);persist();updateSettings();});
   $('plusTempo').addEventListener('click',()=>{store.tempo=Math.min(160,store.tempo+5);persist();updateSettings();});
@@ -534,15 +581,15 @@
   $('difficulty').addEventListener('change',e=>{store.difficulty=Number(e.target.value);makeMeasures();persist();updateSettings();});
   $('startBtn').addEventListener('click',()=>begin());
   $('stopBtn').addEventListener('click',stop);
-  $('regenerateBtn').addEventListener('click',()=>{if(session)return;makeMeasures();renderStaff();setText('statusText','已生成新节奏，准备开始。');});
+  $('regenerateBtn').addEventListener('click',()=>{if(session)return;lastOutcome=null;viewState='pattern';makeMeasures();renderStaff();setText('statusText',t('newRhythmStatus'));});
   $('calibrateBtn').addEventListener('click',()=>begin('calibration'));
   $('testAudioBtn').addEventListener('click',previewClick);
   $('tapPad').addEventListener('pointerdown',e=>{e.preventDefault();tap(e.timeStamp);});
   document.addEventListener('keydown',e=>{if(e.code!=='Space'||e.repeat||!session)return; if(['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;e.preventDefault();tap(e.timeStamp);});
   $('exportBtn').addEventListener('click',exportCSV);
-  $('clearBtn').addEventListener('click',()=>{if(session)return;if(!store.history.length)return;if(confirm('确定清除全部练习记录吗？此操作不可撤销。')){store.history=[];persist();updateHistory();updateStats();}});
+  $('clearBtn').addEventListener('click',()=>{if(session)return;if(!store.history.length)return;if(confirm(t('clearConfirm'))){store.history=[];persist();updateHistory();updateStats();}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&session)stop();});
-  makeMeasures();updateSettings();updateHistory();
+  makeMeasures();translateStatic();updateSettings();updateHistory();resetUI();setText('statusText',t('ready'));
   if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();
 </script>
